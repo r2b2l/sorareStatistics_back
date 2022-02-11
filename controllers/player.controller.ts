@@ -1,4 +1,5 @@
 import * as express from 'express';
+import PlayerModel from '../models/Player.model';
 // import Post from '../models/posts.interface';
  
 class PlayerController {
@@ -22,6 +23,15 @@ class PlayerController {
  
   getPlayer = (request: express.Request, response: express.Response) => {
     response.send(this.player);
+  }
+
+  createPlayer = (request: express.Request, response: express.Response) => {
+    const postData = request.body;
+    const createdPlayer = new PlayerModel(postData);
+    createdPlayer.save()
+      .then((savedPost) => {
+        response.send(savedPost);
+      });
   }
 
 }

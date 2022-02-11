@@ -12,5 +12,5 @@ const app = new App(
 );
 
 app.connectDatabase();
- 
+
 app.listen();
