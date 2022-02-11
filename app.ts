@@ -1,5 +1,7 @@
 import express from 'express';
 import * as bodyParser from 'body-parser';
+import 'dotenv/config';
+import mongoose from 'mongoose';
  
 class App {
   public app: express.Application;
@@ -21,6 +23,10 @@ class App {
     controllers.forEach((controller) => {
       this.app.use('/', controller.router);
     });
+  }
+
+  public connectDatabase() {
+    mongoose.connect('mongodb+srv://'+process.env.MONGO_USER+':'+process.env.MONGO_PASSWORD+process.env.MONGO_PATH);
   }
  
   public listen() {
