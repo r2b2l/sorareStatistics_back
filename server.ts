@@ -1,12 +1,12 @@
 import PlayerController from './controllers/player.controller';
+import ClubController from './controllers/club.controller';
 import App from './app';
-import PostsController from './controllers/posts.controller';
 import 'dotenv/config';
 
 const app = new App(
   [
-    new PostsController(),
-    new PlayerController()
+    new PlayerController(),
+    new ClubController()
   ],
   process.env.PORT,
 );

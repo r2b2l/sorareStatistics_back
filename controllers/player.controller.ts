@@ -2,6 +2,8 @@ import * as express from 'express';
 import PlayerModel from '../models/Player.model';
 import ControllerInterface from './controller.interface';
 import NotFoundException from '../exceptions/NotFoundException';
+import validationMiddleware from '../middleware/validation.middleware';
+import PlayerDto from '../models/Player.dto';
 
 class PlayerController implements ControllerInterface {
   public path = '/player';
@@ -15,8 +17,8 @@ class PlayerController implements ControllerInterface {
     this.router.delete(this.path + '/:id', this.deletePlayer);
     this.router.get(this.path + '/all', this.getAllPlayers);
     this.router.get(this.path + '/:id', this.getPlayerById);
-    this.router.post(this.path, this.createPlayer);
-    this.router.patch(this.path + '/:id', this.updatePlayer);
+    this.router.post(this.path, validationMiddleware(PlayerDto), this.createPlayer);
+    this.router.patch(this.path + '/:id', validationMiddleware(PlayerDto, true), this.updatePlayer);
   }
 
   getAllPlayers(request: express.Request, response: express.Response) {
@@ -32,8 +34,9 @@ class PlayerController implements ControllerInterface {
       throw new NotFoundException('Player', id);
     }
     PlayerModel.findById(id)
-      .then(player => {
+      .then(async player => {
         if (player) {
+          await player.populate('club').execPopulate() // possible de mettre plusieurs colonne dans populate
           response.send(player);
         } else {
           throw new NotFoundException('Player', id);
