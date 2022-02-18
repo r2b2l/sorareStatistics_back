@@ -16,6 +16,7 @@ class PlayerController implements ControllerInterface {
   public intializeRoutes() {
     this.router.delete(this.path + '/:id', this.deletePlayer);
     this.router.get(this.path + '/all', this.getAllPlayers);
+    this.router.get(this.path + '/name/:name', this.getPlayersByName);
     this.router.get(this.path + '/:id', this.getPlayerById);
     this.router.post(this.path, validationMiddleware(PlayerDto), this.createPlayer);
     this.router.patch(this.path + '/:id', validationMiddleware(PlayerDto, true), this.updatePlayer);
@@ -25,6 +26,18 @@ class PlayerController implements ControllerInterface {
     PlayerModel.find()
       .then(players => {
         response.send(players);
+      })
+  }
+
+  getPlayersByName(request: express.Request, response: express.Response) {
+    const name = request.params.name;
+    PlayerModel.find({name: {$regex: name, $options: 'i'}}).limit(5)
+      .then(async players => {
+        if (players) {
+          response.send(players);
+        } else {
+          throw new NotFoundException('Player', name);
+        }
       })
   }
 
