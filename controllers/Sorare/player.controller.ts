@@ -46,15 +46,15 @@ class PlayerController implements ControllerInterface {
     if (id.length !== 24) {
       throw new NotFoundException('Player', id);
     }
-    PlayerModel.findById(id)
-      .then(async player => {
-        if (player) {
-          await player.populate('club').execPopulate() // possible de mettre plusieurs colonne dans populate
-          response.send(player);
-        } else {
-          throw new NotFoundException('Player', id);
-        }
-      })
+    // PlayerModel.findById(id)
+    //   .then(async player => {
+    //     if (player) {
+    //       await player.populate('club').execPopulate() // possible de mettre plusieurs colonne dans populate
+    //       response.send(player);
+    //     } else {
+    //       throw new NotFoundException('Player', id);
+    //     }
+    //   })
   }
 
   createPlayer = (request: express.Request, response: express.Response) => {

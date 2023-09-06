@@ -9,7 +9,7 @@ class PlayerDto {
         console.log('constructor');
     }
     @IsString()
-    public name: String;
+    public name: string;
 
     @IsNumber()
     public L5: number;

@@ -19,7 +19,7 @@ class App {
   private initializeMiddlewares() {
     this.app.use(bodyParser.json());
     this.app.use(errorMiddleware);
-    // Maybe use validation Middleware to protect models 
+    // Maybe use validation Middleware to protect models
     /** @see https://wanago.io/2018/12/17/typescript-express-error-handling-validation/ */
   }
 

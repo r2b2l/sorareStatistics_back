@@ -2,7 +2,7 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import * as express from 'express';
 import HttpException from '../exceptions/HttpException';
- 
+
 function validationMiddleware<T>(type: any, skipMissingProperties = false): express.RequestHandler {
   return (req, res, next) => {
     validate(plainToInstance(type, req.body), { skipMissingProperties })
@@ -16,5 +16,5 @@ function validationMiddleware<T>(type: any, skipMissingProperties = false): expr
       });
   };
 }
- 
+
 export default validationMiddleware;

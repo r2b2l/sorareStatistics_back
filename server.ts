@@ -11,6 +11,6 @@ const app = new App(
   process.env.PORT,
 );
 
-app.connectDatabase();
+// app.connectDatabase();
 
 app.listen();
