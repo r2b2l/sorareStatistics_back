@@ -1,12 +1,12 @@
 import * as express from 'express';
-import PlayerModel from '../models/Player.model';
-import ControllerInterface from './controller.interface';
-import NotFoundException from '../exceptions/NotFoundException';
-import validationMiddleware from '../middleware/validation.middleware';
-import PlayerDto from '../models/Player.dto';
+import PlayerModel from '../../models/Sorare/Player.model';
+import ControllerInterface from '../controller.interface';
+import NotFoundException from '../../exceptions/NotFoundException';
+import validationMiddleware from '../../middleware/validation.middleware';
+import PlayerDto from '../../models/Sorare/Player.dto';
 
 class PlayerController implements ControllerInterface {
-  public path = '/player';
+  public path = '/sorare/player';
   public router = express.Router();
 
   constructor() {

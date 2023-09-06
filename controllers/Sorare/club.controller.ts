@@ -1,10 +1,10 @@
 import * as express from 'express';
-import ClubModel from '../models/Club.model';
-import ControllerInterface from './controller.interface';
-import NotFoundException from '../exceptions/NotFoundException';
+import ClubModel from '../../models/Sorare/Club.model';
+import ControllerInterface from '../controller.interface';
+import NotFoundException from '../../exceptions/NotFoundException';
 
 class ClubController implements ControllerInterface {
-  public path = '/club';
+  public path = '/sorare/club';
   public router = express.Router();
 
   constructor() {

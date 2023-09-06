@@ -1,5 +1,5 @@
-import PlayerController from './controllers/player.controller';
-import ClubController from './controllers/club.controller';
+import PlayerController from './controllers/Sorare/player.controller';
+import ClubController from './controllers/Sorare/club.controller';
 import App from './app';
 import 'dotenv/config';
 
