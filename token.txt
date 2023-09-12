@@ -1,0 +1,15 @@
+{
+  "data": {
+    "signIn": {
+      "currentUser": {
+        "slug": "r2b2l",
+        "jwtToken": {
+          "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI5OTk4OTE0NS00YWViLTQzMGEtOTJkMS1jNzlkOTEwZGNiOWYiLCJzY3AiOiJ1c2VyIiwiYXVkIjoiU3RhdGlzdGljc19BUEkiLCJpYXQiOjE2OTQwMTc0MDYsImV4cCI6IjE2OTY2MDk0MDYiLCJqdGkiOiIwNjE0NjgzMi04MzJjLTQ2OTctYjI5NS1lN2IwYTM0NmQ5NGEifQ.wGxOoa_v7nMiYl4ECkGlXuTHEpBthls_nRnVVRcGDZs",
+          "expiredAt": "2023-10-06T16:23:26Z"
+        }
+      },
+      "otpSessionChallenge": null,
+      "errors": []
+    }
+  }
+}

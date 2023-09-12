@@ -1,1 +1,14 @@
 Aggregates / groups / joins: https://wanago.io/2019/01/07/mongodb-aggregation-basic-data-processing-typescript-express-tutorial-6/
+
+      query {
+        currentUser{
+          apiKey
+          cardsCount
+          ethereumAddress
+          id
+          UserProfile{
+            id
+            clubName
+          }
+        }
+      } 

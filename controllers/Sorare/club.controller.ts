@@ -19,16 +19,18 @@ class ClubController implements ControllerInterface {
     this.router.delete(this.path + '/:id', this.deleteClub);
     this.router.get(this.path + '/all', this.getAllClubs);
     this.router.get(this.path + '/login', this.login);
-    this.router.get(this.path + '/myClub', this.getMyClub);
+    this.router.get(this.path + '/myClub/cards', this.getMyClubCards);
     this.router.get(this.path + '/:id', this.getClubById);
     this.router.post(this.path, this.createClub);
     this.router.patch(this.path + '/:id', this.updateClub);
   }
 
-  hello(request: express.Request, response: express.Response) {
-    response.send('coucou');
-  }
-
+  /**
+   * Perform a login to Sorare API
+   * Todo: Déplacer cette route ailleurs une fois le module adapté créé
+   * @param request
+   * @param response
+   */
   async login(request: express.Request, response: express.Response) {
     // Connect to Sorare
     const email = process.env.SORARE_MAIL;
@@ -37,12 +39,12 @@ class ClubController implements ControllerInterface {
       const saltResponse = await axios.get('https://api.sorare.com/api/v1/users/' + email);
       const saltData = saltResponse.data;
 
-      console.log(saltData);
+      console.log(saltData.salt);
 
-      const hash = bcrypt.hashSync(process.env.SORARE_PASS, saltData.salt);
-      console.log(hash);
+      const hashedPassword = bcrypt.hashSync(process.env.SORARE_PASS, saltData.salt);
+      console.log(hashedPassword);
       const url = process.env.SORARE_GRAPHQL_URL;
-          const SignInMutation = `
+      const SignInMutation = `
             mutation SignInMutation($input: signInInput!) {
               signIn(input: $input) {
                 currentUser {
@@ -54,45 +56,42 @@ class ClubController implements ControllerInterface {
                 }
                 otpSessionChallenge
                 errors {
-                  code
                   message
-                  path
                 }
               }
             }
         `;
 
-          const variables = {
-            input: {
-              email: process.env.SORARE_MAIL,
-              password: hash
-            },
-          }
+      const variables = {
+        input: {
+          "email": process.env.SORARE_MAIL,
+          "password": hashedPassword
+        },
+      }
 
-
-          axios({
-            url,
-            method: 'post',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            data: {
-              query: SignInMutation,
-              variables,
-            },
-          })
-            .then((AxLoginResponse) => {
-              const loginData = AxLoginResponse.data;
-              console.log(loginData);
-              response.send(loginData);
-            })
-            .catch((error) => {
-              console.error('Erreur lors de la mutation GraphQL :', error.code);
-              response.send(error.code);
-            });
+      axios({
+        url,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: SignInMutation,
+          variables,
+        },
+      })
+        .then((AxLoginResponse) => {
+          const loginData = AxLoginResponse.data;
+          console.log(loginData);
+          response.send(loginData);
+        })
+        .catch((error) => {
+          console.error('Erreur lors de la mutation GraphQL :', error.code);
+          response.send(error);
+        });
     } catch (error) {
       console.error('Error lors de la requete du Salt :', error);
-      response.send(error.code);
+      response.send(error);
     }
 
 
@@ -120,23 +119,70 @@ class ClubController implements ControllerInterface {
       })
   }
 
-  async getMyClub(request: express.Request, response: express.Response) {
+  /**
+   * Get the cards linked to logged account
+   * @param request
+   * @param response
+   * @returns array
+   */
+  async getMyClubCards(request: express.Request, response: express.Response) {
+    const url = process.env.SORARE_GRAPHQL_FEDERATION_URL;
+    let cursor = null;
+    const cards: any[] = [];
+    const currentUserQuery = `
+    query AllCardsFromUser($slug: String!, $cursor: String) {
+      user(slug: $slug) {
+        paginatedCards(after: $cursor) {
+          nodes {
+            slug
+            pictureUrl
+            ownerWithRates {
+              from
+              price
+            }
+          }
+          pageInfo {
+            endCursor
+          }
+        }
+      }
+    }
+    `;
 
+    do {
+      const variables = {
+        "slug": 'r2b2l',
+        "cursor": cursor
+      };
 
-    // const query = `
-    //   query {
-    //     // Votre requête GraphQL ici
-    //   }
-    // `;
+      // Get cards until the cursor and store them in array
+      await axios({
+        url,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + process.env.SORARE_JWT_TOKEN,
+          'JWT-AUD': process.env.SORARE_JWT_AUD
+        },
+        data: {
+          query: currentUserQuery,
+          variables
+        },
+      })
+        .then((currentUserResponse) => {
+          currentUserResponse.data.data.user.paginatedCards.nodes.forEach((item) => {
+            cards.push(item);
+          });
+          cursor = currentUserResponse.data.data.user.paginatedCards.pageInfo.endCursor;
+        })
+        .catch((error) => {
+          console.error('Erreur lors de la query GraphQL :', error);
+          response.send(error);
+        });
+    }
+    while (cursor != null);
 
-    // try {
-    //   const AxResponse = await axios.post(url, { query });
-    //   const data = AxResponse.data.data; // Les données de réponse
-    //   console.log(data);
-    //   response.send(data);
-    // } catch (error) {
-    //   console.error('Erreur lors de la requête GraphQL :', error);
-    // }
+    response.send(cards);
   }
 
   createClub = (request: express.Request, response: express.Response) => {
