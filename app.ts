@@ -3,6 +3,7 @@ import * as bodyParser from 'body-parser';
 import 'dotenv/config';
 import mongoose from 'mongoose';
 import errorMiddleware from './middleware/error.middleware';
+import audit from 'express-requests-logger';
 
 class App {
   public app: express.Application;
@@ -19,6 +20,7 @@ class App {
   private initializeMiddlewares() {
     this.app.use(bodyParser.json());
     this.app.use(errorMiddleware);
+    // this.app.use(audit()); // Logger
     // Maybe use validation Middleware to protect models
     /** @see https://wanago.io/2018/12/17/typescript-express-error-handling-validation/ */
   }
