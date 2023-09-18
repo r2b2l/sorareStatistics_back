@@ -6,6 +6,6 @@
       "rootDir": "./",
       "baseUrl": "./",
       "outDir": "./dist",
-      "esModuleInterop": true
+      "esModuleInterop": true,
     }
 }

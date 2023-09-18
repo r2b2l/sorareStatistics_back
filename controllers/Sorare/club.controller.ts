@@ -6,6 +6,8 @@ dotenv.config();
 import ClubModel from '../../models/Sorare/Club.model';
 import ControllerInterface from '../controller.interface';
 import NotFoundException from '../../exceptions/NotFoundException';
+import { QALLCARDSFROMUSER, QSINGLECARD } from '../../utills/sorare/graphql/queries';
+import { MSIGNIN } from '../../utills/sorare/graphql/mutations';
 
 class ClubController implements ControllerInterface {
   public path = '/sorare/club';
@@ -21,6 +23,7 @@ class ClubController implements ControllerInterface {
     this.router.get(this.path + '/login', this.login);
     this.router.get(this.path + '/myClub/cards', this.getMyClubCards);
     this.router.get(this.path + '/:id', this.getClubById);
+    this.router.get(this.path + '/card/:slug', this.getCard);
     this.router.post(this.path, this.createClub);
     this.router.patch(this.path + '/:id', this.updateClub);
   }
@@ -32,36 +35,16 @@ class ClubController implements ControllerInterface {
    * @param response
    */
   async login(request: express.Request, response: express.Response) {
-    // Connect to Sorare
     const email = process.env.SORARE_MAIL;
 
     try {
+      // Get saltKey from Sorare
       const saltResponse = await axios.get('https://api.sorare.com/api/v1/users/' + email);
       const saltData = saltResponse.data;
-
-      console.log(saltData.salt);
-
       const hashedPassword = bcrypt.hashSync(process.env.SORARE_PASS, saltData.salt);
-      console.log(hashedPassword);
-      const url = process.env.SORARE_GRAPHQL_URL;
-      const SignInMutation = `
-            mutation SignInMutation($input: signInInput!) {
-              signIn(input: $input) {
-                currentUser {
-                  slug
-                  jwtToken(aud: "Statistics_API") {
-                    token
-                    expiredAt
-                  }
-                }
-                otpSessionChallenge
-                errors {
-                  message
-                }
-              }
-            }
-        `;
 
+      // Second call, perform Sign in
+      const url = process.env.SORARE_GRAPHQL_URL;
       const variables = {
         input: {
           "email": process.env.SORARE_MAIL,
@@ -76,7 +59,7 @@ class ClubController implements ControllerInterface {
           'Content-Type': 'application/json',
         },
         data: {
-          query: SignInMutation,
+          query: MSIGNIN,
           variables,
         },
       })
@@ -93,8 +76,6 @@ class ClubController implements ControllerInterface {
       console.error('Error lors de la requete du Salt :', error);
       response.send(error);
     }
-
-
   }
 
   getAllClubs(request: express.Request, response: express.Response) {
@@ -129,25 +110,6 @@ class ClubController implements ControllerInterface {
     const url = process.env.SORARE_GRAPHQL_FEDERATION_URL;
     let cursor = null;
     const cards: any[] = [];
-    const currentUserQuery = `
-    query AllCardsFromUser($slug: String!, $cursor: String) {
-      user(slug: $slug) {
-        paginatedCards(after: $cursor) {
-          nodes {
-            slug
-            pictureUrl
-            ownerWithRates {
-              from
-              price
-            }
-          }
-          pageInfo {
-            endCursor
-          }
-        }
-      }
-    }
-    `;
 
     do {
       const variables = {
@@ -161,11 +123,12 @@ class ClubController implements ControllerInterface {
         method: 'post',
         headers: {
           'Content-Type': 'application/json',
+          'SORARE_APIKEY': process.env.SORARE_API_KEY,
           'Authorization': 'Bearer ' + process.env.SORARE_JWT_TOKEN,
           'JWT-AUD': process.env.SORARE_JWT_AUD
         },
         data: {
-          query: currentUserQuery,
+          query: QALLCARDSFROMUSER,
           variables
         },
       })
@@ -183,6 +146,36 @@ class ClubController implements ControllerInterface {
     while (cursor != null);
 
     response.send(cards);
+  }
+
+  async getCard(request: express.Request, response: express.Response) {
+    const url = process.env.SORARE_GRAPHQL_FEDERATION_URL;
+    const slug = request.params.slug;
+    const variables = {
+      "slugs": [slug]
+    };
+
+    await axios({
+      url,
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+        'SORARE_APIKEY': process.env.SORARE_API_KEY,
+        'Authorization': 'Bearer ' + process.env.SORARE_JWT_TOKEN,
+        'JWT-AUD': process.env.SORARE_JWT_AUD
+      },
+      data: {
+        query: QSINGLECARD,
+        variables
+      }
+    })
+    .then((cardResponse) => {
+      response.send(cardResponse.data);
+    })
+    .catch((error) => {
+      console.error('Erreur lors de la query GraphQL :' + error);
+      response.send(error);
+    })
   }
 
   createClub = (request: express.Request, response: express.Response) => {
