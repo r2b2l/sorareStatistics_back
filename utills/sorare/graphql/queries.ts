@@ -9,6 +9,7 @@ query AllCardsFromUser($slug: String!, $cursor: String) {
         rarity
         player {
           displayName
+          slug
         }
         ownerWithRates {
           from
@@ -42,6 +43,38 @@ query SingleCard($slugs: [String!]) {
     }
   }
 }
+`;
+
+export const QPLAYERINFOS = `
+query PlayerInfos($slug: String!) {
+  football {
+    player(slug: $slug) {
+      id
+      age
+      country {
+        slug
+        flagUrl
+      }
+      displayName
+      position
+      slug
+      activeClub {
+        name
+      }
+      lastFiveSo5Appearances
+      lastFifteenSo5Appearances
+      allSo5Scores {
+        nodes{
+          game {
+            date
+          }
+          score
+        }
+      }
+    }
+  }
+}
+
 `;
 
 // Ne fonctionne pas
