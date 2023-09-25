@@ -1,9 +1,13 @@
 import * as express from 'express';
+import axios from 'axios';
+import dotenv from 'dotenv';
+dotenv.config();
 import PlayerModel from '../../models/Sorare/Player.model';
 import ControllerInterface from '../controller.interface';
 import NotFoundException from '../../exceptions/NotFoundException';
 import validationMiddleware from '../../middleware/validation.middleware';
 import PlayerDto from '../../models/Sorare/Player.dto';
+import { QPLAYERINFOS } from '../../utills/sorare/graphql/queries';
 
 class PlayerController implements ControllerInterface {
   public path = '/sorare/player';
@@ -17,6 +21,7 @@ class PlayerController implements ControllerInterface {
     this.router.delete(this.path + '/:id', this.deletePlayer);
     this.router.get(this.path + '/all', this.getAllPlayers);
     this.router.get(this.path + '/name/:name', this.getPlayersByName);
+    this.router.get(this.path + '/slug/:slug', this.getPLayerBySlug);
     this.router.get(this.path + '/:id', this.getPlayerById);
     this.router.post(this.path, validationMiddleware(PlayerDto), this.createPlayer);
     this.router.patch(this.path + '/:id', validationMiddleware(PlayerDto, true), this.updatePlayer);
@@ -27,6 +32,41 @@ class PlayerController implements ControllerInterface {
       .then(players => {
         response.send(players);
       })
+  }
+
+  /**
+   * Get player infos through Sorare's API
+   * @param request
+   * @param response
+   */
+  async getPLayerBySlug(request: express.Request, response: express.Response) {
+    const url = process.env.SORARE_GRAPHQL_FEDERATION_URL;
+    const slug = request.params.slug;
+    const variables = {
+      "slug": slug
+    };
+
+    await axios({
+      url,
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+        'SORARE_APIKEY': process.env.SORARE_API_KEY,
+        'Authorization': 'Bearer ' + process.env.SORARE_JWT_TOKEN,
+        'JWT-AUD': process.env.SORARE_JWT_AUD
+      },
+      data: {
+        query: QPLAYERINFOS,
+        variables
+      }
+    })
+    .then((playerResponse) => {
+      response.send(playerResponse.data);
+    })
+    .catch((error) => {
+      console.error('Erreur lors de la query GraphQL :' + error);
+      response.send(error);
+    })
   }
 
   getPlayersByName(request: express.Request, response: express.Response) {

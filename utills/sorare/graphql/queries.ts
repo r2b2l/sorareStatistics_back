@@ -39,6 +39,7 @@ query SingleCard($slugs: [String!]) {
     player {
       id
       displayName
+      pictureUrl
       slug
     }
   }
@@ -50,6 +51,7 @@ query PlayerInfos($slug: String!) {
   football {
     player(slug: $slug) {
       id
+      slug
       age
       country {
         slug
@@ -57,9 +59,9 @@ query PlayerInfos($slug: String!) {
       }
       displayName
       position
-      slug
+      pictureUrl
       activeClub {
-        name
+        slug
       }
       lastFiveSo5Appearances
       lastFifteenSo5Appearances
@@ -74,7 +76,6 @@ query PlayerInfos($slug: String!) {
     }
   }
 }
-
 `;
 
 // Ne fonctionne pas
