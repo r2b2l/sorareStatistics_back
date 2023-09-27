@@ -54,6 +54,7 @@ query PlayerInfos($slug: String!) {
       slug
       age
       country {
+        id
         slug
         flagUrl
       }
@@ -62,6 +63,14 @@ query PlayerInfos($slug: String!) {
       pictureUrl
       activeClub {
         slug
+        name
+        pictureUrl
+        pictureSecondaryUrl
+        country {
+          id
+          slug
+          flagUrl
+        }
       }
       lastFiveSo5Appearances
       lastFifteenSo5Appearances
@@ -72,6 +81,25 @@ query PlayerInfos($slug: String!) {
           }
           score
         }
+      }
+    }
+  }
+}
+`;
+
+export const QCLUBINFOS = `
+query ClubInfos($slug: String!) {
+  football {
+    club(slug: $slug) {
+      id
+      slug
+      name
+      shortName
+      pictureUrl
+      country {
+        id
+        slug
+        flagUrl
       }
     }
   }

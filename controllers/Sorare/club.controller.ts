@@ -6,7 +6,7 @@ dotenv.config();
 import ClubModel from '../../models/Sorare/Club.model';
 import ControllerInterface from '../controller.interface';
 import NotFoundException from '../../exceptions/NotFoundException';
-import { QALLCARDSFROMUSER, QSINGLECARD } from '../../utills/sorare/graphql/queries';
+import { QALLCARDSFROMUSER, QCLUBINFOS, QSINGLECARD } from '../../utills/sorare/graphql/queries';
 import { MSIGNIN } from '../../utills/sorare/graphql/mutations';
 
 class ClubController implements ControllerInterface {
@@ -22,6 +22,7 @@ class ClubController implements ControllerInterface {
     this.router.get(this.path + '/all', this.getAllClubs);
     this.router.get(this.path + '/login', this.login);
     this.router.get(this.path + '/myClub/cards', this.getMyClubCards);
+    this.router.get(this.path + '/slug/:slug', this.getClubBySlug);
     this.router.get(this.path + '/:id', this.getClubById);
     this.router.get(this.path + '/card/:slug', this.getCard);
     this.router.post(this.path, this.createClub);
@@ -98,6 +99,41 @@ class ClubController implements ControllerInterface {
           throw new NotFoundException('Club', id);
         }
       })
+  }
+
+  /**
+   * Get club informations
+   * @param request
+   * @param response
+   */
+  async getClubBySlug(request: express.Request, response: express.Response) {
+    const url = process.env.SORARE_GRAPHQL_FEDERATION_URL;
+    const slug = request.params.slug;
+    const variables = {
+      "slug": slug
+    };
+
+    await axios({
+      url,
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+        'SORARE_APIKEY': process.env.SORARE_API_KEY,
+        'Authorization': 'Bearer ' + process.env.SORARE_JWT_TOKEN,
+        'JWT-AUD': process.env.SORARE_JWT_AUD
+      },
+      data: {
+        query: QCLUBINFOS,
+        variables
+      }
+    })
+    .then((clubResponse) => {
+      response.send(clubResponse.data);
+    })
+    .catch((error) => {
+      console.error('Erreur lors de la query GraphQL :' + error);
+      response.send(error);
+    })
   }
 
   /**
