@@ -9,6 +9,9 @@ import validationMiddleware from '../../middleware/validation.middleware';
 import PlayerDto from '../../models/Sorare/Player.dto';
 import { QPLAYERINFOS } from '../../utills/sorare/graphql/queries';
 
+/**
+ * Player Controller
+ */
 class PlayerController implements ControllerInterface {
   public path = '/sorare/player';
   public router = express.Router();
@@ -17,6 +20,9 @@ class PlayerController implements ControllerInterface {
     this.intializeRoutes();
   }
 
+  /**
+   * Initiate all player routes 
+   */
   public intializeRoutes() {
     this.router.delete(this.path + '/:id', this.deletePlayer);
     this.router.get(this.path + '/all', this.getAllPlayers);
@@ -27,7 +33,11 @@ class PlayerController implements ControllerInterface {
     this.router.patch(this.path + '/:id', validationMiddleware(PlayerDto, true), this.updatePlayer);
   }
 
-  getAllPlayers(request: express.Request, response: express.Response) {
+  /**
+   * Get all players
+   * @param response 
+   */
+  getAllPlayers(response: express.Response) {
     PlayerModel.find()
       .then(players => {
         response.send(players);
@@ -46,6 +56,7 @@ class PlayerController implements ControllerInterface {
       "slug": slug
     };
 
+    // Perform Player infos request
     await axios({
       url,
       method: 'post',

@@ -9,6 +9,9 @@ import NotFoundException from '../../exceptions/NotFoundException';
 import { QALLCARDSFROMUSER, QCLUBINFOS, QSINGLECARD } from '../../utills/sorare/graphql/queries';
 import { MSIGNIN } from '../../utills/sorare/graphql/mutations';
 
+/**
+ * Club Controller
+ */
 class ClubController implements ControllerInterface {
   public path = '/sorare/club';
   public router = express.Router();
@@ -17,6 +20,9 @@ class ClubController implements ControllerInterface {
     this.intializeRoutes();
   }
 
+  /**
+   * Instantiate all Club routes
+   */
   public intializeRoutes() {
     this.router.delete(this.path + '/:id', this.deleteClub);
     this.router.get(this.path + '/all', this.getAllClubs);
@@ -32,10 +38,9 @@ class ClubController implements ControllerInterface {
   /**
    * Perform a login to Sorare API
    * Todo: Déplacer cette route ailleurs une fois le module adapté créé
-   * @param request
    * @param response
    */
-  async login(request: express.Request, response: express.Response) {
+  async login(response: express.Response) {
     const email = process.env.SORARE_MAIL;
 
     try {
@@ -79,13 +84,22 @@ class ClubController implements ControllerInterface {
     }
   }
 
-  getAllClubs(request: express.Request, response: express.Response) {
+  /**
+   * Get all clubs informations 
+   * @param response 
+   */
+  getAllClubs(response: express.Response) {
     ClubModel.find()
       .then(clubs => {
         response.send(clubs);
       })
   }
 
+  /**
+   * Get a club informations by its id
+   * @param request 
+   * @param response 
+   */
   getClubById(request: express.Request, response: express.Response) {
     const id = request.params.id;
     if (id.length !== 24) {
@@ -102,7 +116,7 @@ class ClubController implements ControllerInterface {
   }
 
   /**
-   * Get club informations
+   * Get club informations by its slug
    * @param request
    * @param response
    */
@@ -113,6 +127,7 @@ class ClubController implements ControllerInterface {
       "slug": slug
     };
 
+    // Perform club informations request
     await axios({
       url,
       method: 'post',
@@ -137,7 +152,7 @@ class ClubController implements ControllerInterface {
   }
 
   /**
-   * Get the cards linked to logged account
+   * Get all cards linked to logged account
    * @param request
    * @param response
    * @returns array
@@ -153,7 +168,7 @@ class ClubController implements ControllerInterface {
         "cursor": cursor
       };
 
-      // Get cards until the cursor and store them in array
+      // Perform cards linked to the club and store them in array
       await axios({
         url,
         method: 'post',
@@ -191,6 +206,7 @@ class ClubController implements ControllerInterface {
       "slugs": [slug]
     };
 
+    // Perform card request
     await axios({
       url,
       method: 'post',
