@@ -29,6 +29,7 @@ class ClubController implements ControllerInterface {
     this.router.get(this.path + '/login', this.login);
     this.router.get(this.path + '/myClub/cards', this.getMyClubCards);
     this.router.get(this.path + '/slug/:slug', this.getClubBySlug);
+    this.router.get(this.path + '/:slug/players', this.getPlayersByClubSlug);
     this.router.get(this.path + '/:id', this.getClubById);
     this.router.get(this.path + '/card/:slug', this.getCard);
     this.router.post(this.path, this.createClub);
@@ -85,8 +86,8 @@ class ClubController implements ControllerInterface {
   }
 
   /**
-   * Get all clubs informations 
-   * @param response 
+   * Get all clubs informations
+   * @param response
    */
   getAllClubs(response: express.Response) {
     ClubModel.find()
@@ -97,8 +98,8 @@ class ClubController implements ControllerInterface {
 
   /**
    * Get a club informations by its id
-   * @param request 
-   * @param response 
+   * @param request
+   * @param response
    */
   getClubById(request: express.Request, response: express.Response) {
     const id = request.params.id;
@@ -121,6 +122,15 @@ class ClubController implements ControllerInterface {
    * @param response
    */
   async getClubBySlug(request: express.Request, response: express.Response) {
+    /**
+     * Try Axios caching
+     * Default caching POST isn't supported
+     * If making Axios config here, impossible to call with await even if declared in constructor
+     */
+    // this.axios = setupCache(Axios, {
+    //   debug: console.log,
+    //   methods: ['get', 'post']
+    // });
     const url = process.env.SORARE_GRAPHQL_FEDERATION_URL;
     const slug = request.params.slug;
     const variables = {
@@ -148,7 +158,43 @@ class ClubController implements ControllerInterface {
     .catch((error) => {
       console.error('Erreur lors de la query GraphQL :' + error);
       response.send(error);
-    })
+    });
+  }
+
+  /**
+   * Get club players by club slug
+   * @param request
+   * @param response
+   */
+  async getPlayersByClubSlug(request: express.Request, response: express.Response) {
+    const url = process.env.SORARE_GRAPHQL_FEDERATION_URL;
+    const slug = request.params.slug;
+    const variables = {
+      "slug": slug
+    };
+
+        // Perform club players request
+        await axios({
+          url,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+            'SORARE_APIKEY': process.env.SORARE_API_KEY,
+            'Authorization': 'Bearer ' + process.env.SORARE_JWT_TOKEN,
+            'JWT-AUD': process.env.SORARE_JWT_AUD
+          },
+          data: {
+            query: "?",
+            variables
+          }
+        })
+        .then((clubPlayersResponse) => {
+          response.send(clubPlayersResponse.data);
+        })
+        .catch((error) => {
+          console.error('Erreur lors de la query GraphQL :' + error);
+          response.send(error);
+        });
   }
 
   /**

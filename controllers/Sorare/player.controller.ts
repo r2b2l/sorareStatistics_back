@@ -21,7 +21,7 @@ class PlayerController implements ControllerInterface {
   }
 
   /**
-   * Initiate all player routes 
+   * Initiate all player routes
    */
   public intializeRoutes() {
     this.router.delete(this.path + '/:id', this.deletePlayer);
@@ -35,7 +35,7 @@ class PlayerController implements ControllerInterface {
 
   /**
    * Get all players
-   * @param response 
+   * @param response
    */
   getAllPlayers(response: express.Response) {
     PlayerModel.find()
