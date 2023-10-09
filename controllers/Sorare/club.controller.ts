@@ -6,7 +6,7 @@ dotenv.config();
 import ClubModel from '../../models/Sorare/Club.model';
 import ControllerInterface from '../controller.interface';
 import NotFoundException from '../../exceptions/NotFoundException';
-import { QALLCARDSFROMUSER, QCLUBINFOS, QSINGLECARD } from '../../utills/sorare/graphql/queries';
+import { QALLCARDSFROMUSER, QCLUBINFOS, QSINGLECARD, QPLAYERSBYCLUB } from '../../utills/sorare/graphql/queries';
 import { MSIGNIN } from '../../utills/sorare/graphql/mutations';
 
 /**
@@ -184,7 +184,7 @@ class ClubController implements ControllerInterface {
             'JWT-AUD': process.env.SORARE_JWT_AUD
           },
           data: {
-            query: "?",
+            query: QPLAYERSBYCLUB,
             variables
           }
         })

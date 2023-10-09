@@ -106,6 +106,28 @@ query ClubInfos($slug: String!) {
 }
 `;
 
+export const QPLAYERSBYCLUB = `
+query PlayersByClubSlug($slug: String!) {
+  football {
+    club(slug: $slug) {
+      id
+      slug
+      activePlayers{
+        nodes{
+          id
+          slug
+          displayName
+          lastFiveSo5Appearances
+          lastFifteenSo5Appearances
+          pictureUrl
+          position
+        }
+      }
+    }
+  }
+}
+`;
+
 // Ne fonctionne pas
 export const FSIMPLEPLAYERINFOS = `
 fragment PlayerParts on Card {
