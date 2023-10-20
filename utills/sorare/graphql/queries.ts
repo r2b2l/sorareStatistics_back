@@ -101,6 +101,33 @@ query ClubInfos($slug: String!) {
         slug
         flagUrl
       }
+      activeCompetitions {
+        name
+      }
+      domesticLeague {
+        displayName
+        logoUrl
+      }
+      upcomingGames(first: 10) {
+        date
+        competition {
+          displayName
+        }
+        homeTeam {
+          ... on Club {
+            slug
+            name
+            pictureUrl
+          }
+        }
+        awayTeam {
+          ... on Club {
+            slug
+            name
+            pictureUrl
+          }
+        }
+      }
     }
   }
 }

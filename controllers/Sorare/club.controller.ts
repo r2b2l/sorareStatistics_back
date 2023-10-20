@@ -50,6 +50,8 @@ class ClubController implements ControllerInterface {
       const saltData = saltResponse.data;
       const hashedPassword = bcrypt.hashSync(process.env.SORARE_PASS, saltData.salt);
 
+      console.log(hashedPassword);
+
       // Second call, perform Sign in
       const url = process.env.SORARE_GRAPHQL_URL;
       const variables = {
