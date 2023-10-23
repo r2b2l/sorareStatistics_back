@@ -148,6 +148,8 @@ query PlayersByClubSlug($slug: String!) {
           lastFifteenSo5Appearances
           pictureUrl
           position
+          fiveSo5Average: averageScore(type: LAST_FIVE_SO5_AVERAGE_SCORE)
+          fifteenSo15Average: averageScore(type: LAST_FIFTEEN_SO5_AVERAGE_SCORE)
         }
       }
     }

@@ -74,7 +74,6 @@ class ClubController implements ControllerInterface {
       })
         .then((AxLoginResponse) => {
           const loginData = AxLoginResponse.data;
-          console.log(loginData);
           response.send(loginData);
         })
         .catch((error) => {
