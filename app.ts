@@ -32,7 +32,13 @@ class App {
   }
 
   public connectDatabase() {
-    mongoose.connect('mongodb+srv://'+process.env.MONGO_USER+':'+process.env.MONGO_PASSWORD+process.env.MONGO_PATH);
+    mongoose.connect('mongodb+srv://' + process.env.MONGO_USER + ':' + process.env.MONGO_PASSWORD + process.env.MONGO_PATH + '/?retryWrites=true&w=majority');
+    const db = mongoose.connection;
+
+    db.on('error', console.error.bind(console, 'Erreur de connexion a la base de base de donnees'));
+    db.once('open', () => {
+      console.log('Connecte a la base de donnees');
+    })
   }
 
   public listen() {

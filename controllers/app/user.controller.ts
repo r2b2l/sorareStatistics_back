@@ -1,0 +1,75 @@
+import * as express from 'express';
+import dotenv from 'dotenv';
+dotenv.config();
+import ControllerInterface from 'controllers/controller.interface';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import UserModel from '../../models/App/User.model';
+import UserDto from '../../models/App/User.dto';
+
+/**
+ * User Controller
+ */
+class UserController implements ControllerInterface {
+    public path = '/user';
+    public router = express.Router();
+
+    constructor() {
+        this.initializeRoutes();
+    }
+
+    /**
+     * Init all routes
+     */
+    public initializeRoutes() {
+        this.router.post('/login', this.login);
+        this.router.post(this.path + '/create', this.createUser);
+    }
+
+    async createUser(request: express.Request, response: express.Response) {
+        try {
+            const saltRounds = 10; // hashing rounds
+            const hashedPassword = await bcrypt.hash(request.body.password, saltRounds);
+
+            const user = new UserModel({
+                mail: request.body.mail,
+                password: hashedPassword,
+                role: request.body.role
+            });
+
+            const newDbUSer = await user.save();
+            response.status(201).json(newDbUSer);
+        } catch (error) {
+            response.status(400).json({ message: error.message });
+        }
+    }
+
+    async login(request: express.Request, response: express.Response) {
+        const { mail, password } = request.body;
+
+        try {
+            const errorMessage = "Utilisateur ou mot de passe incorrect.";
+            const user: UserDto = await UserModel.findOne({ $or: [{ mail }] });
+
+            if (!user) {
+                return response.status(401).json({ message: errorMessage })
+            }
+            console.log(user);
+            const isPasswordValid = await bcrypt.compare(password, user.password);
+
+            if (!isPasswordValid) {
+                return response.status(401).json({ message: errorMessage });
+            }
+
+            response.status(200).json({ message: 'OK!' });
+        } catch (error) {
+            response.status(500).json({ message: error.message });
+        }
+    }
+
+    private generateToken(mail: string) {
+        const token = jwt.Sign({ mail }, process.env.API_JWT_SECRET, { expiresIn})
+    }
+}
+
+export default UserController;
