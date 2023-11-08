@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import ControllerInterface from 'controllers/controller.interface';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import JwtService from '../../services/jwtService';
 import UserModel from '../../models/App/User.model';
 import UserDto from '../../models/App/User.dto';
 
@@ -13,6 +13,7 @@ import UserDto from '../../models/App/User.dto';
 class UserController implements ControllerInterface {
     public path = '/user';
     public router = express.Router();
+    public jwtService: JwtService = new JwtService();
 
     constructor() {
         this.initializeRoutes();
@@ -22,7 +23,7 @@ class UserController implements ControllerInterface {
      * Init all routes
      */
     public initializeRoutes() {
-        this.router.post('/login', this.login);
+        this.router.post('/login', this.login.bind(this)); // Bind this to login function to be able to call this.jwtService
         this.router.post(this.path + '/create', this.createUser);
     }
 
@@ -54,22 +55,19 @@ class UserController implements ControllerInterface {
             if (!user) {
                 return response.status(401).json({ message: errorMessage })
             }
-            console.log(user);
             const isPasswordValid = await bcrypt.compare(password, user.password);
 
             if (!isPasswordValid) {
                 return response.status(401).json({ message: errorMessage });
             }
-
-            response.status(200).json({ message: 'OK!' });
+            const token = this.jwtService.generateToken(user.mail);
+            response.status(200).json({ isSuccess: true, token });
         } catch (error) {
             response.status(500).json({ message: error.message });
         }
     }
 
-    private generateToken(mail: string) {
-        const token = jwt.Sign({ mail }, process.env.API_JWT_SECRET, { expiresIn})
-    }
+
 }
 
 export default UserController;

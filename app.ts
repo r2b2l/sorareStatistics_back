@@ -3,6 +3,7 @@ import * as bodyParser from 'body-parser';
 import 'dotenv/config';
 import mongoose from 'mongoose';
 import errorMiddleware from './middleware/error.middleware';
+import verifyTokenMiddleware from './middleware/verifiyToken.middleware';
 import audit from 'express-requests-logger';
 
 class App {
@@ -20,6 +21,7 @@ class App {
   private initializeMiddlewares() {
     this.app.use(bodyParser.json());
     this.app.use(errorMiddleware);
+    this.app.use(verifyTokenMiddleware);
     // this.app.use(audit()); // Logger
     // Maybe use validation Middleware to protect models
     /** @see https://wanago.io/2018/12/17/typescript-express-error-handling-validation/ */
@@ -27,7 +29,11 @@ class App {
 
   private initializeControllers(controllers) {
     controllers.forEach((controller) => {
-      this.app.use('/', controller.router);
+      if (controller.path !== '/login') {
+        this.app.use('/', controller.router);
+      }
+      // If route is /login, don't attach token verification middleware, even if already check '/login'
+      this.app.use(controller.router);
     });
   }
 

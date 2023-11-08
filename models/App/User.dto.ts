@@ -6,7 +6,7 @@ class UserDto {
     }
 
     @IsEmail()
-    public email: string;
+    public mail: string;
 
     @IsStrongPassword() // Check if match 6+ char aBcd5%
     public password: string;
