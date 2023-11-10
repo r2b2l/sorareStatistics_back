@@ -5,14 +5,13 @@ dotenv.config();
 
 /**
  * Vérify JWT Token passed in 'Authorization' header
- * @param request 
- * @param response 
- * @param next 
- * @returns 
+ * @param request
+ * @param response
+ * @param next
+ * @returns
  */
 function verifyTokenMiddleware(request: Request, response: Response, next: NextFunction) {
     const token = request.header('Authorization');
-
     // If /login, don't verify token
     if (request.path === '/login') {
         return next();
