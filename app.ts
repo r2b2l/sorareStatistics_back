@@ -29,7 +29,7 @@ class App {
 
   private initializeControllers(controllers) {
     controllers.forEach((controller) => {
-      if (controller.path !== '/login') {
+      if (controller.path !== '/login' || controller.path !== '/resetPassword') {
         this.app.use('/', controller.router);
       }
       // If route is /login, don't attach token verification middleware, even if already check '/login'

@@ -13,7 +13,7 @@ dotenv.config();
 function verifyTokenMiddleware(request: Request, response: Response, next: NextFunction) {
     const token = request.header('Authorization');
     // If /login, don't verify token
-    if (request.path === '/login') {
+    if (request.path === '/login' || request.path === '/resetPassword') {
         return next();
     }
 

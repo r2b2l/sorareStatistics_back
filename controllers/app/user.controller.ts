@@ -25,7 +25,7 @@ class UserController implements ControllerInterface {
     public initializeRoutes() {
         this.router.post('/login', this.login.bind(this)); // Bind this to login function to be able to call this.jwtService
         this.router.post(this.path + '/create', this.createUser);
-        this.router.post(this.path + '/resetPassword', this.resetPassword);
+        this.router.post('/resetPassword', this.resetPassword);
     }
 
     async createUser(request: express.Request, response: express.Response) {
@@ -87,6 +87,7 @@ class UserController implements ControllerInterface {
                 const modifiedDbUser = await user.save();
                 response.status(200).json({modifiedDbUser});
             }
+            response.status(401).json({ message: 'Modification de mot de passe non autorisée.'})
         } catch (error) {
             response.status(500).json({ message: error.message });
         }
